@@ -10,7 +10,6 @@ import os
 import difflib
 
 def closest_path(approx_path: str) -> str | None:
-    print(approx_path)
     approx_path = os.path.normpath(approx_path)
 
     dir_path, last_part = os.path.split(approx_path)

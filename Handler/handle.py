@@ -6,12 +6,13 @@ import threading
 from handler import screen as screenmod
 import os
 from . import FS
+from handler.config import set_chat
 
 bot = gl.bot
 
 working_th = threading.Thread()
 def working():
-    while work:
+    while gl.work:
         time.sleep(30 * 60)
         bot.send_message(gl.chat, 'Stand')
         time.sleep(10 * 60)
@@ -23,6 +24,9 @@ if(gl.work):
 @bot.message_handler(func=lambda message: message.text.lower() == "work")
 def worker(message):
     print(message.chat.id)
+    if(gl.chat != message.chat.id):
+        set_chat(message.chat.id)
+        gl.chat = message.chat.id
     global work, working_th
     work = True
     if(not working_th.is_alive()):
@@ -32,6 +36,9 @@ def worker(message):
 @bot.message_handler(func=lambda message: message.text.lower() == "stop")
 def worker(message):
     print(message.chat.id)
+    if(gl.chat != message.chat.id):
+        set_chat(message.chat.id)
+        gl.chat = message.chat.id
     global work
     work = False
     bot.send_message(message.chat.id, 'Working mode deactivated')
@@ -39,6 +46,9 @@ def worker(message):
 @bot.message_handler(commands=['shutdown'])
 def worker(message):
     print(message.chat.id)
+    if(gl.chat != message.chat.id):
+        set_chat(message.chat.id)
+        gl.chat = message.chat.id
     import os
     bot.send_message(message.chat.id, 'Goodbye')
     os.system('shutdown /s /t 1')
@@ -46,6 +56,9 @@ def worker(message):
 @bot.message_handler(func=lambda message: message.text.lower().startswith("wheel "))
 def write(message):
     print(message.chat.id)
+    if(gl.chat != message.chat.id):
+        set_chat(message.chat.id)
+        gl.chat = message.chat.id
     try:
         pyautogui.scroll(int(message.text[6:]))
     finally:
@@ -55,6 +68,9 @@ def write(message):
 @bot.message_handler(func=lambda message: message.text.lower().startswith("move "))
 def hold(message):
     print(message.chat.id)
+    if(gl.chat != message.chat.id):
+        set_chat(message.chat.id)
+        gl.chat = message.chat.id
     spl = message.text[5:].split()
     if(len(spl) == 2):
         moveRel(int(spl[0]), int(spl[1]), duration=gl.delay / gl.DELAY_MULTIPLICATOR)
@@ -66,6 +82,9 @@ def hold(message):
 @bot.message_handler(func=lambda message: message.text.lower().startswith("exec "))
 def write(message):
     print(message.chat.id)
+    if(gl.chat != message.chat.id):
+        set_chat(message.chat.id)
+        gl.chat = message.chat.id
     global answer
     def answer(text, message=message):
         bot.send_message(message.chat.id, str(text))
@@ -78,6 +97,9 @@ def write(message):
 @bot.message_handler(func=lambda message: message.text.lower().startswith("eval "))
 def write(message):
     print(message.chat.id)
+    if(gl.chat != message.chat.id):
+        set_chat(message.chat.id)
+        gl.chat = message.chat.id
     try:
         bot.send_message(message.chat.id, eval(message.text[5:]))
     finally:
@@ -86,6 +108,9 @@ def write(message):
 @bot.message_handler(func=lambda message: message.text.lower().startswith("write "))
 def write(message):
     print(message.chat.id)
+    if(gl.chat != message.chat.id):
+        set_chat(message.chat.id)
+        gl.chat = message.chat.id
     pyautogui.write(message.text[6:])
     if(gl.command_delete):
         bot.delete_message(chat_id=message.chat.id, message_id=message.message_id)
@@ -95,6 +120,9 @@ def write(message):
 @bot.message_handler(func=lambda message: message.text.lower().startswith("hold "))
 def hold(message):
     print(message.chat.id)
+    if(gl.chat != message.chat.id):
+        set_chat(message.chat.id)
+        gl.chat = message.chat.id
     sp = message.text[5:].strip().split()
     print(sp)
     pyautogui.keyDown(sp[0])
@@ -129,6 +157,9 @@ def hold(message):
 @bot.message_handler(func=lambda message: message.text.lower().startswith("release "))
 def hold(message):
     print(message.chat.id)
+    if(gl.chat != message.chat.id):
+        set_chat(message.chat.id)
+        gl.chat = message.chat.id
     if(gl.command_delete):
         bot.delete_message(chat_id=message.chat.id, message_id=message.message_id)
     screenmod.screen(message, message.chat.id, gl.screen_id)
@@ -136,6 +167,9 @@ def hold(message):
 @bot.message_handler(func=lambda message: message.text.lower().startswith("press "))
 def press(message):
     print(message.chat.id)
+    if(gl.chat != message.chat.id):
+        set_chat(message.chat.id)
+        gl.chat = message.chat.id
     spl = message.text[6:].split()
     if(len(spl) == 2):
         left, right = spl
@@ -173,17 +207,26 @@ def press(message):
 @bot.message_handler(commands=['ping'])
 def hold(message):
     print(message.chat.id)
+    if(gl.chat != message.chat.id):
+        set_chat(message.chat.id)
+        gl.chat = message.chat.id
     bot.send_message(message.chat.id, "PING")
 
 @bot.message_handler(commands=['exit'])
 def exit(message):
     print(message.chat.id)
-    bot.send_message(message.chat.id, "EXIT")
+    if(gl.chat != message.chat.id):
+        set_chat(message.chat.id)
+        gl.chat = message.chat.id
+    bot.send_message(message.chat.id, "Goodbye")
     os._exit(1)
 
 @bot.message_handler(commands=['help'])
-def hold(message):
+def help(message):
     print(message.chat.id)
+    if(gl.chat != message.chat.id):
+        set_chat(message.chat.id)
+        gl.chat = message.chat.id
     bot.send_message(message.chat.id, '''Comand list:
     Wheel <num>
     Press <keyboard shortcut> [times]
