@@ -5,8 +5,9 @@ from handler import globals as gl
 from handler.movRel import *
 import os
 
-TOKEN = os.getenv('TELEGRAM_TOKEN')
 load_dotenv()
+TOKEN = os.getenv('TELEGRAM_TOKEN')
+
 bot = telebot.TeleBot(TOKEN)
 print()
 print("active")
