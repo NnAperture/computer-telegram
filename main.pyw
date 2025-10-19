@@ -11,8 +11,23 @@ import keyboard
 import sys
 import os
 import io
+from handler.config import config
 
-work = False
+load_dotenv()
+
+TOKEN = os.getenv('TELEGRAM_TOKEN')
+delay = config["screen"]["delay"]
+DELAY_MULTIPLICATOR = config["screen"]["delay_step"]
+speed = config["screen"]["speed"]
+command_delete = config["screen"]["command_delete"]
+cursor_draw = config["screen"]["cursor_draw"]
+screenshot_resize = config["screen"]["screenshot_resize"]
+
+path = config["FS"]["path"]
+
+work = config["addictive"]["work"]
+
+screen_id = 0
 def working():
     while work:
         time.sleep(30 * 60)
@@ -29,20 +44,9 @@ def video_updater():
 
 
 # Введите сюда ваш токен, полученный у BotFather
-load_dotenv()
-TOKEN = os.getenv('TELEGRAM_TOKEN')
 
 # Создаем экземпляр бота
 bot = telebot.TeleBot(TOKEN)
-
-delay = 0
-speed = 10
-path = "C:\\Users\\robom\\OneDrive\\Desktop"
-screen_id = 0
-comand_delete = True
-cursor_draw = True
-screenshot_resize = True
-DELAY_MULTIPLICATOR = 5
 
 def moveRel(x, y, duration):
     if(float(duration) == 0.0):
@@ -123,7 +127,7 @@ def screen(message=None, chat=None, id=None):
         button5 = InlineKeyboardButton(text='tab', callback_data='tab') 
         inline_kb.add(button1, button2, button3, button4, button5)
 
-        caption = f"speed:{speed}px; delay:{delay / DELAY_MULTIPLICATOR}s; Comand deleting:{comand_delete}; Screenshot resize: {screenshot_resize}"
+        caption = f"speed:{speed}px; delay:{delay / DELAY_MULTIPLICATOR}s; Comand deleting:{command_delete}; Screenshot resize: {screenshot_resize}"
 
         if id is None:
             m = bot.send_photo(chat_id=message.chat.id, photo=img_bytes, reply_markup=inline_kb, caption=caption)
@@ -142,7 +146,7 @@ def screen(message=None, chat=None, id=None):
 @bot.callback_query_handler(func=lambda call: True)
 def callback_query_handler(call):
     try:
-        global speed, delay, video, comand_delete, screenshot_resize
+        global speed, delay, video, command_delete, screenshot_resize
         _delay = True
         if call.data == 'up':
             moveRel(0, -speed, duration=delay / DELAY_MULTIPLICATOR)
@@ -171,7 +175,7 @@ def callback_query_handler(call):
         elif call.data == 'lmb':
             pyautogui.click(button='left')
         elif call.data == 'comdel':
-            comand_delete = not comand_delete
+            command_delete = not command_delete
         elif call.data == 'scrres':
             screenshot_resize = not screenshot_resize
         elif call.data == 'video':
@@ -279,7 +283,7 @@ def write(message):
     try:
         pyautogui.scroll(int(message.text[6:]))
     finally:
-        if(comand_delete):
+        if(command_delete):
             bot.delete_message(chat_id=message.chat.id, message_id=message.message_id)
 
 @bot.message_handler(func=lambda message: message.text.startswith("Exec "))
@@ -303,7 +307,7 @@ def write(message):
 @bot.message_handler(func=lambda message: message.text.startswith("Write "))
 def write(message):
     pyautogui.write(message.text[6:])
-    if(comand_delete):
+    if(command_delete):
         bot.delete_message(chat_id=message.chat.id, message_id=message.message_id)
     time.sleep(0.1)
     screen(message, message.chat.id, screen_id)
@@ -338,7 +342,7 @@ def hold(message):
                 threading.Thread(target=a).start()
     except Exception as e:
         print(f"Произошла ошибка: {e}")
-    if(comand_delete):
+    if(command_delete):
         bot.delete_message(chat_id=message.chat.id, message_id=message.message_id)
     screen(message, message.chat.id, screen_id)
 
@@ -349,12 +353,12 @@ def hold(message):
         moveRel(int(spl[0]), int(spl[1]), duration=delay / DELAY_MULTIPLICATOR)
     else:
         moveRel(int(spl[0]), int(spl[1]), int(spl[2]))
-    if(comand_delete):
+    if(command_delete):
         bot.delete_message(chat_id=message.chat.id, message_id=message.message_id)
 
 @bot.message_handler(func=lambda message: message.text.startswith("Release "))
 def hold(message):
-    if(comand_delete):
+    if(command_delete):
         bot.delete_message(chat_id=message.chat.id, message_id=message.message_id)
     screen(message, message.chat.id, screen_id)
 
@@ -390,7 +394,7 @@ def press(message):
         except:
             if(lis[key] != ''):
                 bot.send_message(message.chat.id, 'Unexpected key: ' + lis[key])
-    if(comand_delete):
+    if(command_delete):
         bot.delete_message(chat_id=message.chat.id, message_id=message.message_id)
     screen(message, message.chat.id, screen_id)
 
