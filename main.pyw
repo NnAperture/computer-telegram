@@ -26,20 +26,23 @@ screenshot_resize = config["screen"]["screenshot_resize"]
 path = config["FS"]["path"]
 
 work = config["addictive"]["work"]
+chat = config["addictive"]["your_chat"]
 
-screen_id = 0
+
+working_th = threading.Thread()
 def working():
     while work:
         time.sleep(30 * 60)
-        bot.send_message(5650499270, 'Stand')
+        bot.send_message(chat, 'Stand')
         time.sleep(10 * 60)
-        bot.send_message(5650499270, 'Good')
+        bot.send_message(chat, 'Good')
 
+screen_id = 0
 video = False
 def video_updater():
     print(screen_id, video)
     while screen_id != 0 and video:
-        screen(None, 5650499270, screen_id)
+        screen(None, chat, screen_id)
         time.sleep(delay / 5)
 
 
@@ -64,6 +67,8 @@ def moveRel(x, y, duration):
 # Обработчик всех текстовых сообщений
 @bot.message_handler(commands=['screen'])
 def screen(message=None, chat=None, id=None):
+    if(message != None):
+        print(message.chat.id)
     global screen_id
     try:
         # Делаем скриншот сразу в память
@@ -145,6 +150,7 @@ def screen(message=None, chat=None, id=None):
 
 @bot.callback_query_handler(func=lambda call: True)
 def callback_query_handler(call):
+    print(call.message.chat.id)
     try:
         global speed, delay, video, command_delete, screenshot_resize
         _delay = True
@@ -252,21 +258,25 @@ def callback_query_handler(call):
         print(e)
 
 
-@bot.message_handler(commands=['work'])
+@bot.message_handler(func=lambda message: message.text == "Work")
 def worker(message):
-    global work
+    print(message.chat.id)
+    global work, working_th
     work = True
-    threading.Thread(target=working).start()
+    if(not working_th.is_alive()):
+        (working_th := threading.Thread(target=working)).start()
     bot.send_message(message.chat.id, 'Working mode activated')
 
-@bot.message_handler(commands=['stop'])
+@bot.message_handler(func=lambda message: message.text == "Stop")
 def worker(message):
+    print(message.chat.id)
     global work
     work = False
     bot.send_message(message.chat.id, 'Working mode deactivated')
 
 @bot.message_handler(commands=['video'])
 def worker(message):
+    print(message.chat.id)
     global video
     video = True
     threading.Thread(target=video_updater).start()
@@ -274,12 +284,14 @@ def worker(message):
 
 @bot.message_handler(commands=['shutdown'])
 def worker(message):
+    print(message.chat.id)
     import os
     bot.send_message(message.chat.id, 'Goodbye')
     os.system('shutdown /s /t 1')
 
 @bot.message_handler(func=lambda message: message.text.startswith("Wheel "))
 def write(message):
+    print(message.chat.id)
     try:
         pyautogui.scroll(int(message.text[6:]))
     finally:
@@ -288,6 +300,7 @@ def write(message):
 
 @bot.message_handler(func=lambda message: message.text.startswith("Exec "))
 def write(message):
+    print(message.chat.id)
     global answer
     def answer(text, message=message):
         bot.send_message(message.chat.id, str(text))
@@ -299,6 +312,7 @@ def write(message):
 
 @bot.message_handler(func=lambda message: message.text.startswith("Eval "))
 def write(message):
+    print(message.chat.id)
     try:
         bot.send_message(message.chat.id, eval(message.text[5:]))
     finally:
@@ -306,6 +320,7 @@ def write(message):
 
 @bot.message_handler(func=lambda message: message.text.startswith("Write "))
 def write(message):
+    print(message.chat.id)
     pyautogui.write(message.text[6:])
     if(command_delete):
         bot.delete_message(chat_id=message.chat.id, message_id=message.message_id)
@@ -314,7 +329,7 @@ def write(message):
 
 @bot.message_handler(func=lambda message: message.text.startswith("Hold "))
 def hold(message):
-    print(message.text)
+    print(message.chat.id)
     sp = message.text[5:].strip().split()
     print(sp)
     pyautogui.keyDown(sp[0])
@@ -348,6 +363,7 @@ def hold(message):
 
 @bot.message_handler(func=lambda message: message.text.startswith("Move "))
 def hold(message):
+    print(message.chat.id)
     spl = message.text[5:].split()
     if(len(spl) == 2):
         moveRel(int(spl[0]), int(spl[1]), duration=delay / DELAY_MULTIPLICATOR)
@@ -358,12 +374,14 @@ def hold(message):
 
 @bot.message_handler(func=lambda message: message.text.startswith("Release "))
 def hold(message):
+    print(message.chat.id)
     if(command_delete):
         bot.delete_message(chat_id=message.chat.id, message_id=message.message_id)
     screen(message, message.chat.id, screen_id)
 
 @bot.message_handler(func=lambda message: message.text.startswith("Press "))
 def press(message):
+    print(message.chat.id)
     spl = message.text[6:].split()
     if(len(spl) == 2):
         left, right = spl
@@ -400,21 +418,25 @@ def press(message):
 
 @bot.message_handler(commands=['ping'])
 def hold(message):
+    print(message.chat.id)
     bot.send_message(message.chat.id, "PING")
 
 @bot.message_handler(commands=['exit'])
 def exit(message):
+    print(message.chat.id)
     bot.send_message(message.chat.id, "EXIT")
     os._exit(1)
 
 @bot.message_handler(func=lambda message: message.text.startswith("Sd "))
 def sd(message):
+    print(message.chat.id)
     global path
     if(os.path.exists(message.text[3:])):
         path = message.text[3:]
 
 @bot.message_handler(func=lambda message: message.text.startswith("Cd "))
 def cd(message):
+    print(message.chat.id)
     global path
     cmd = message.text[3:]
     if(cmd == '..'):
@@ -435,11 +457,13 @@ def cd(message):
 
 @bot.message_handler(func=lambda message: message.text.startswith("Start "))
 def write(message):
+    print(message.chat.id)
     import subprocess
     subprocess.Popen([os.path.join(path, message.text[6:])])
 
 @bot.message_handler(func=lambda message: message.text.startswith("Type "))
 def typee(message):
+    print(message.chat.id)
     name = message.text[5:]
     try:
         if(len(text := open(os.path.join(path, name), encoding="utf-8").read()) < 4000):
@@ -451,11 +475,13 @@ def typee(message):
 
 @bot.message_handler(func=lambda message: message.text.startswith("Send "))
 def typee(message):
+    print(message.chat.id)
     name = message.text[5:]
     bot.send_document(message.chat.id, open(os.path.join(path, name), "rb"))
 
 @bot.message_handler(func=lambda message: message.text.startswith("Rewrite "))
 def rewrite(message):
+    print(message.chat.id)
     name, *text = message.text[8:].split("\n")
     with open(os.path.join(path, name), "w") as f:
         f.write("\n".join(text))
@@ -463,6 +489,7 @@ def rewrite(message):
 
 @bot.message_handler(func=lambda message: message.text.startswith("Addwrite "))
 def rewrite(message):
+    print(message.chat.id)
     name, *text = message.text[9:].split("\n")
     print(text)
     with open(os.path.join(path, name), "a") as f:
@@ -471,6 +498,7 @@ def rewrite(message):
 
 @bot.message_handler(func=lambda message: message.text == "Dir")
 def Dir(message):
+    print(message.chat.id)
     text = path + "\n\n"
     contents = os.listdir(path)
 
@@ -485,6 +513,7 @@ def Dir(message):
 
 @bot.message_handler(content_types=['document'], func=lambda message: message.caption.startswith("Rewrite "))
 def handle_document(message):
+    print(message.chat.id)
     file_id = message.document.file_id
     file_info = bot.get_file(file_id)
     downloaded_file = bot.download_file(file_info.file_path)
@@ -498,6 +527,7 @@ def handle_document(message):
 
 @bot.message_handler(content_types=['document'], func=lambda message: message.caption.startswith("Addwrite "))
 def handle_document(message):
+    print(message.chat.id)
     file_id = message.document.file_id
     file_info = bot.get_file(file_id)
     downloaded_file = bot.download_file(file_info.file_path)
@@ -511,6 +541,7 @@ def handle_document(message):
 
 @bot.message_handler(commands=['help'])
 def hold(message):
+    print(message.chat.id)
     bot.send_message(message.chat.id, '''Comand list:
     Wheel <num>
     Press <keyboard shortcut> [times]
@@ -519,14 +550,17 @@ def hold(message):
     Release <key>
     Eval <expression>
     Exec <python code>
-                     Dir
+    Dir
     Cd <dir>
     Sd <dir>
     Start <file in current directory name>
     Type <file in current directory name>
     Send <file in current directory name>
     Rewrite <file in current directory name>\n    <text>
-    Addwrite <file in current directory name>\n    <text>''')
+    Addwrite <file in current directory name>\n    <text>
+                     
+    Work - enable working mode (reminder to stand up during work)
+    Stop - disable working mode''')
     
 
 #for Exec comand
@@ -535,16 +569,16 @@ def answer():
 
 print()
 print("active")
-bot.send_message(5650499270, 'Hi')
+try:
+    bot.send_message(chat, 'Hi')
+except:
+    pass
 commands = [
+    telebot.types.BotCommand('/help', 'Text comand list'),
+    telebot.types.BotCommand('/ping', 'Ping (useless, but you can check if your bot works)'),
     telebot.types.BotCommand('/screen', 'Activate screenmove mode'),
+    telebot.types.BotCommand('/shutdown', 'Shut your computer down'),
     telebot.types.BotCommand('/exit', 'Exit bot'),
-    telebot.types.BotCommand('/help', 'Comand list'),
-    telebot.types.BotCommand('/work', 'Start working'),
-    telebot.types.BotCommand('/stop', 'Stop working'),
-    telebot.types.BotCommand('/shutdown', 'Shut down'),
-    telebot.types.BotCommand('/ping', 'Ping'),
-    telebot.types.BotCommand('/video', 'Video updater'),    
 ]
 bot.set_my_commands(commands)
 
@@ -552,4 +586,7 @@ while True:
     try:
         bot.polling()
     except Exception as e:
-        bot.send_message(5650499270, str(e))
+        try:
+            bot.send_message(chat, str(e))
+        except:
+            pass

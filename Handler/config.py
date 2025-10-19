@@ -4,7 +4,6 @@ conf.read('config.conf')
 config = {}
 for section in conf:
     for variable in conf[section]:
-        print(section, variable)
         value = conf[section][variable]
         if(value == "true"):
             config.setdefault(section, {})[variable] = True
