@@ -16,6 +16,9 @@ def working():
         bot.send_message(gl.chat, 'Stand')
         time.sleep(10 * 60)
         bot.send_message(gl.chat, 'Good')
+if(gl.work):
+    if(not working_th.is_alive()):
+        (working_th := threading.Thread(target=working)).start()
 
 @bot.message_handler(func=lambda message: message.text.lower() == "work")
 def worker(message):
