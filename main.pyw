@@ -3,7 +3,7 @@ import time
 import threading
 from telebot.types import InlineKeyboardMarkup, InlineKeyboardButton, InputMediaPhoto
 import pyautogui
-import tempfile
+import pydirectinput
 from PIL import Image, ImageDraw
 from screeninfo import get_monitors
 from dotenv import load_dotenv
@@ -41,8 +41,21 @@ path = "C:\\Users\\robom\\OneDrive\\Desktop"
 screen_id = 0
 comand_delete = True
 cursor_draw = True
-screenshot_resize = False
+screenshot_resize = True
 DELAY_MULTIPLICATOR = 5
+
+def moveRel(x, y, duration):
+    if(float(duration) == 0.0):
+        pydirectinput.moveRel(x, y)
+    else:
+        current_x, current_y = pydirectinput.position()
+        step_x = x / int(duration / 0.01)
+        step_y = y / int(duration / 0.01)
+        for i in range(int(duration / 0.01)):
+            current_x += step_x
+            current_y += step_y
+            pydirectinput.moveTo(int(current_x), int(current_y))
+            time.sleep(0.01)
 
 # Обработчик всех текстовых сообщений
 @bot.message_handler(commands=['screen'])
@@ -74,29 +87,40 @@ def screen(message=None, chat=None, id=None):
         button4 = InlineKeyboardButton(text='alt+f4', callback_data='close') 
         button5 = InlineKeyboardButton(text='alt+tab', callback_data='change') 
         inline_kb.add(button1, button2, button3, button4, button5) 
+
         button1 = InlineKeyboardButton(text='Delay-', callback_data='del-') 
         button2 = InlineKeyboardButton(text='Delay+', callback_data='del+') 
         button3 = InlineKeyboardButton(text='^', callback_data='up') 
         button4 = InlineKeyboardButton(text='ComDel', callback_data='comdel') 
         button5 = InlineKeyboardButton(text='ScreenRes', callback_data='scrres') 
         inline_kb.add(button1, button2, button3, button4, button5) 
+
         button1 = InlineKeyboardButton(text='<<', callback_data='left2') 
         button2 = InlineKeyboardButton(text='<', callback_data='left') 
         button3 = InlineKeyboardButton(text='LMB', callback_data='lmb') 
         button4 = InlineKeyboardButton(text='>', callback_data='right') 
         button5 = InlineKeyboardButton(text='>>', callback_data='right2') 
         inline_kb.add(button1, button2, button3, button4, button5) 
+
         button1 = InlineKeyboardButton(text='DLMB', callback_data='dlmb') 
         button2 = InlineKeyboardButton(text='RMB', callback_data='rmb') 
         button3 = InlineKeyboardButton(text='\\/', callback_data='down') 
         button4 = InlineKeyboardButton(text='sp-', callback_data='sp-') 
-        button5 = InlineKeyboardButton(text='sp--', callback_data='sp--') 
+        button5 = InlineKeyboardButton(text='sp+', callback_data='sp+') 
         inline_kb.add(button1, button2, button3, button4, button5) 
+
         button1 = InlineKeyboardButton(text='Space', callback_data='space') 
         button2 = InlineKeyboardButton(text='Enter', callback_data='enter') 
         button3 = InlineKeyboardButton(text='\\/\\/', callback_data='down2') 
-        button4 = InlineKeyboardButton(text='sp+', callback_data='sp+') 
+        button4 = InlineKeyboardButton(text='sp--', callback_data='sp--') 
         button5 = InlineKeyboardButton(text='sp++', callback_data='sp++') 
+        inline_kb.add(button1, button2, button3, button4, button5)
+
+        button1 = InlineKeyboardButton(text='kLeft', callback_data='kleft') 
+        button2 = InlineKeyboardButton(text='kDown', callback_data='kdown') 
+        button3 = InlineKeyboardButton(text='kUp', callback_data='kup') 
+        button4 = InlineKeyboardButton(text='kRight', callback_data='kright') 
+        button5 = InlineKeyboardButton(text='tab', callback_data='tab') 
         inline_kb.add(button1, button2, button3, button4, button5)
 
         caption = f"speed:{speed}px; delay:{delay / DELAY_MULTIPLICATOR}s; Comand deleting:{comand_delete}; Screenshot resize: {screenshot_resize}"
@@ -121,28 +145,28 @@ def callback_query_handler(call):
         global speed, delay, video, comand_delete, screenshot_resize
         _delay = True
         if call.data == 'up':
-            pyautogui.moveTo(pyautogui.position().x, pyautogui.position().y - speed, duration=delay / DELAY_MULTIPLICATOR)
+            moveRel(0, -speed, duration=delay / DELAY_MULTIPLICATOR)
             _delay = False
         elif call.data == 'down':
-            pyautogui.moveTo(pyautogui.position().x, pyautogui.position().y + speed, duration=delay / DELAY_MULTIPLICATOR)
+            moveRel(0, +speed, duration=delay / DELAY_MULTIPLICATOR)
             _delay = False
         elif call.data == 'left':
-            pyautogui.moveTo(pyautogui.position().x - speed, pyautogui.position().y, duration=delay / DELAY_MULTIPLICATOR)
+            moveRel(-speed, 0, duration=delay / DELAY_MULTIPLICATOR)
             _delay = False
         elif call.data == 'right':
-            pyautogui.moveTo(pyautogui.position().x + speed, pyautogui.position().y, duration=delay / DELAY_MULTIPLICATOR)
+            moveRel(+speed, 0, duration=delay / DELAY_MULTIPLICATOR)
             _delay = False
         if call.data == 'up2':
-            pyautogui.moveTo(pyautogui.position().x, pyautogui.position().y - speed * 2, duration=delay / DELAY_MULTIPLICATOR)
+            moveRel(0, -speed * 2, duration=delay / DELAY_MULTIPLICATOR)
             _delay = False
         elif call.data == 'down2':
-            pyautogui.moveTo(pyautogui.position().x, pyautogui.position().y + speed * 2, duration=delay / DELAY_MULTIPLICATOR)
+            moveRel(0, +speed * 2, duration=delay / DELAY_MULTIPLICATOR)
             _delay = False
         elif call.data == 'left2':
-            pyautogui.moveTo(pyautogui.position().x - speed * 2, pyautogui.position().y, duration=delay / DELAY_MULTIPLICATOR)
+            moveRel(-speed * 2, 0, duration=delay / DELAY_MULTIPLICATOR)
             _delay = False
         elif call.data == 'right2':
-            pyautogui.moveTo(pyautogui.position().x + speed * 2, pyautogui.position().y, duration=delay / DELAY_MULTIPLICATOR)
+            moveRel(+speed * 2, 0, duration=delay / DELAY_MULTIPLICATOR)
             _delay = False
         elif call.data == 'lmb':
             pyautogui.click(button='left')
@@ -173,9 +197,15 @@ def callback_query_handler(call):
         elif call.data == 'sp--' and speed > 10:
             speed //= 4
         elif call.data == 'space':
+            _delay = False
             keyboard.press("space")
+            time.sleep(delay)
+            keyboard.release("space")
         elif call.data == 'enter':
+            _delay = False
             keyboard.press("enter")
+            time.sleep(delay)
+            keyboard.release("enter")
         elif call.data == "change":
             keyboard.press("alt")
             keyboard.press_and_release("tab")
@@ -184,6 +214,31 @@ def callback_query_handler(call):
             keyboard.press("alt")
             keyboard.press_and_release("f4")
             keyboard.release("alt")
+        elif call.data == 'kup':
+            _delay = False
+            keyboard.press("up")
+            time.sleep(delay)
+            keyboard.release("up")
+        elif call.data == 'kdown':
+            _delay = False
+            keyboard.press("down")
+            time.sleep(delay)
+            keyboard.release("down")
+        elif call.data == 'kleft':
+            _delay = False
+            keyboard.press("left")
+            time.sleep(delay)
+            keyboard.release("left")
+        elif call.data == 'kright':
+            _delay = False
+            keyboard.press("right")
+            time.sleep(delay)
+            keyboard.release("right")
+        elif call.data == 'tab':
+            _delay = False
+            keyboard.press("tab")
+            time.sleep(delay)
+            keyboard.release("tab")
 
         bot.answer_callback_query(call.id, call.data)
         if(_delay):
@@ -257,7 +312,6 @@ def write(message):
 def hold(message):
     print(message.text)
     sp = message.text[5:].strip().split()
-    #
     print(sp)
     pyautogui.keyDown(sp[0])
     if not sp:
@@ -287,6 +341,16 @@ def hold(message):
     if(comand_delete):
         bot.delete_message(chat_id=message.chat.id, message_id=message.message_id)
     screen(message, message.chat.id, screen_id)
+
+@bot.message_handler(func=lambda message: message.text.startswith("Move "))
+def hold(message):
+    spl = message.text[5:].split()
+    if(len(spl) == 2):
+        moveRel(int(spl[0]), int(spl[1]), duration=delay / DELAY_MULTIPLICATOR)
+    else:
+        moveRel(int(spl[0]), int(spl[1]), int(spl[2]))
+    if(comand_delete):
+        bot.delete_message(chat_id=message.chat.id, message_id=message.message_id)
 
 @bot.message_handler(func=lambda message: message.text.startswith("Release "))
 def hold(message):
@@ -479,6 +543,7 @@ commands = [
     telebot.types.BotCommand('/video', 'Video updater'),    
 ]
 bot.set_my_commands(commands)
+
 while True:
     try:
         bot.polling()
