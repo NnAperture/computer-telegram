@@ -1,0 +1,7 @@
+aiogram
+pyautogui
+keyboard
+PyTelegramBotApi
+dotenv
+Pillow
+screeninfo
