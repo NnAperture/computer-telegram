@@ -27,8 +27,8 @@ def worker(message):
     if(gl.chat != message.chat.id):
         set_chat(message.chat.id)
         gl.chat = message.chat.id
-    global work, working_th
-    work = True
+    global working_th
+    gl.work = True
     if(not working_th.is_alive()):
         (working_th := threading.Thread(target=working)).start()
     bot.send_message(message.chat.id, 'Working mode activated')
@@ -39,8 +39,7 @@ def worker(message):
     if(gl.chat != message.chat.id):
         set_chat(message.chat.id)
         gl.chat = message.chat.id
-    global work
-    work = False
+    gl.work = False
     bot.send_message(message.chat.id, 'Working mode deactivated')
 
 @bot.message_handler(commands=['shutdown'])

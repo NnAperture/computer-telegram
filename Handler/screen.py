@@ -21,8 +21,55 @@ def screen(message=None, chat=None, id=None):
         if gl.cursor_draw:
             draw = ImageDraw.Draw(screenshot)
             x, y = pyautogui.position()
-            r = 5
+            r = 8
+            draw.ellipse((x - r, y - r, x + r, y + r), fill='green')
+            r = 6
             draw.ellipse((x - r, y - r, x + r, y + r), fill='red')
+            r = 5
+            color = 'green'
+            
+            for _ in range(2):
+                x, y = pyautogui.position()
+                x -= gl.speed
+                draw.ellipse((x - r, y - r, x + r, y + r), fill=color)
+                x -= gl.speed
+                draw.ellipse((x - r, y - r, x + r, y + r), fill=color)
+                x, y = pyautogui.position()
+                x += gl.speed
+                draw.ellipse((x - r, y - r, x + r, y + r), fill=color)
+                x += gl.speed
+                draw.ellipse((x - r, y - r, x + r, y + r), fill=color)
+
+                x, y = pyautogui.position()
+                y -= gl.speed
+                draw.ellipse((x - r, y - r, x + r, y + r), fill=color)
+                y -= gl.speed
+                draw.ellipse((x - r, y - r, x + r, y + r), fill=color)
+                x, y = pyautogui.position()
+                y += gl.speed
+                draw.ellipse((x - r, y - r, x + r, y + r), fill=color)
+                y += gl.speed
+                draw.ellipse((x - r, y - r, x + r, y + r), fill=color)
+
+                x, y = pyautogui.position()
+                y -= gl.speed
+                x -= gl.speed
+                draw.ellipse((x - r, y - r, x + r, y + r), fill=color)
+                x, y = pyautogui.position()
+                y -= gl.speed
+                x += gl.speed
+                draw.ellipse((x - r, y - r, x + r, y + r), fill=color)
+                x, y = pyautogui.position()
+                y += gl.speed
+                x -= gl.speed
+                draw.ellipse((x - r, y - r, x + r, y + r), fill=color)
+                x, y = pyautogui.position()
+                y += gl.speed
+                x += gl.speed
+                draw.ellipse((x - r, y - r, x + r, y + r), fill=color)
+
+                r = 3
+                color = 'white'
 
         if(gl.screenshot_resize):
             screenshot = screenshot.resize((screenshot.width // 3, screenshot.height // 3))
