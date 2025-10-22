@@ -14,8 +14,12 @@ working_th = threading.Thread()
 def working():
     while gl.work:
         time.sleep(30 * 60)
+        if(not gl.work):
+            return
         bot.send_message(gl.chat, 'Stand')
         time.sleep(10 * 60)
+        if(not gl.work):
+            return
         bot.send_message(gl.chat, 'Good')
 if(gl.work):
     if(not working_th.is_alive()):
