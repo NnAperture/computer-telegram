@@ -27,7 +27,7 @@ gl.bot = bot
 
 
 import handler.handle
-bot.polling()
+
 while True:
     try:
         bot.polling()
